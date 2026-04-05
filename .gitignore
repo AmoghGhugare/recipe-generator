@@ -1,0 +1,18 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore datasets
+data/
+*.csv
+
+# Ignore training checkpoints
+training_checkpoints/
+
+# Ignore large model files
+*.bin
+*.safetensors
+
+# Ignore environment files
+venv/
+.env
