@@ -2,7 +2,7 @@ import streamlit as st
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 
 # -------------------------------
-# Page Configuration
+# Page Config
 # -------------------------------
 st.set_page_config(
     page_title="🍳 Smart Recipe Generator",
@@ -14,10 +14,10 @@ st.set_page_config(
 # Title
 # -------------------------------
 st.title("🍳 Smart Recipe Generator")
-st.markdown("Generate recipes using ingredients you have!")
+st.write("Generate recipes using ingredients you have!")
 
 # -------------------------------
-# Load Model (cached for speed)
+# Load Model (cache for speed)
 # -------------------------------
 @st.cache_resource
 def load_model():
@@ -28,7 +28,7 @@ def load_model():
 tokenizer, model = load_model()
 
 # -------------------------------
-# Input Section
+# Input
 # -------------------------------
 ingredients = st.text_area(
     "📝 Enter ingredients (comma separated):",
@@ -36,7 +36,7 @@ ingredients = st.text_area(
 )
 
 # -------------------------------
-# Generate Button
+# Button
 # -------------------------------
 if st.button("🍽️ Generate Recipe"):
 
@@ -61,44 +61,45 @@ if st.button("🍽️ Generate Recipe"):
                 repetition_penalty=2.0
             )
 
-            # Decode
+            # Decode (IMPORTANT: recipe defined here)
             recipe = tokenizer.decode(outputs[0], skip_special_tokens=True)
 
         # -------------------------------
-        # Display Output
+        # Display Structured Output
         # -------------------------------
         st.success("✅ Recipe Generated!")
 
-# -------------------------------
-# Structured Output Formatting
-# -------------------------------
+        # Split into lines
+        lines = recipe.split(". ")
 
-# Try to split recipe into lines
-lines = recipe.split(". ")
+        # Title
+        title = lines[0] if len(lines) > 0 else "Generated Recipe"
 
-# Recipe Title (first line)
-title = lines[0] if len(lines) > 0 else "Generated Recipe"
+        # Lists
+        ingredients_list = []
+        steps_list = []
 
-# Ingredients & Steps (basic assumption)
-ingredients_list = []
-steps_list = []
+        for line in lines[1:]:
+            if any(word in line.lower() for word in ["ingredient", "add", "mix", "use"]):
+                ingredients_list.append(line.strip())
+            else:
+                steps_list.append(line.strip())
 
-for line in lines[1:]:
-    if any(word in line.lower() for word in ["ingredient", "add", "mix", "use"]):
-        ingredients_list.append(line.strip())
-    else:
-        steps_list.append(line.strip())
+        # -------------------------------
+        # UI Output
+        # -------------------------------
+        st.subheader(f"🍲 {title}")
 
-# -------------------------------
-# Display Structured Output
-# -------------------------------
+        st.markdown("### 📝 Ingredients")
+        if ingredients_list:
+            for item in ingredients_list[:6]:
+                st.write(f"- {item}")
+        else:
+            st.write("Ingredients not clearly identified.")
 
-st.subheader(f"🍲 {title}")
-
-st.markdown("### 📝 Ingredients")
-for item in ingredients_list[:6]:  # limit for cleaner UI
-    st.write(f"- {item}")
-
-st.markdown("### 👨‍🍳 Steps")
-for i, step in enumerate(steps_list[:8], 1):
-    st.write(f"{i}. {step}")
+        st.markdown("### 👨‍🍳 Steps")
+        if steps_list:
+            for i, step in enumerate(steps_list[:8], 1):
+                st.write(f"{i}. {step}")
+        else:
+            st.write(recipe)  # fallback
