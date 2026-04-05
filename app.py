@@ -69,5 +69,36 @@ if st.button("🍽️ Generate Recipe"):
         # -------------------------------
         st.success("✅ Recipe Generated!")
 
-        st.subheader("🍲 Your Recipe")
-        st.write(recipe)
+# -------------------------------
+# Structured Output Formatting
+# -------------------------------
+
+# Try to split recipe into lines
+lines = recipe.split(". ")
+
+# Recipe Title (first line)
+title = lines[0] if len(lines) > 0 else "Generated Recipe"
+
+# Ingredients & Steps (basic assumption)
+ingredients_list = []
+steps_list = []
+
+for line in lines[1:]:
+    if any(word in line.lower() for word in ["ingredient", "add", "mix", "use"]):
+        ingredients_list.append(line.strip())
+    else:
+        steps_list.append(line.strip())
+
+# -------------------------------
+# Display Structured Output
+# -------------------------------
+
+st.subheader(f"🍲 {title}")
+
+st.markdown("### 📝 Ingredients")
+for item in ingredients_list[:6]:  # limit for cleaner UI
+    st.write(f"- {item}")
+
+st.markdown("### 👨‍🍳 Steps")
+for i, step in enumerate(steps_list[:8], 1):
+    st.write(f"{i}. {step}")
